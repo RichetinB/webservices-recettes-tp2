@@ -8,6 +8,8 @@ import { BaseExceptionFilter } from '@nestjs/core';
 const HTTP_STATUS: Partial<Record<status, number>> = {
   [status.ALREADY_EXISTS]: 409,
   [status.INVALID_ARGUMENT]: 400,
+  [status.NOT_FOUND]: 404,
+  [status.PERMISSION_DENIED]: 403,
   [status.UNAUTHENTICATED]: 401,
   [status.UNAVAILABLE]: 503,
 };
