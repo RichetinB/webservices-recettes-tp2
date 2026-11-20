@@ -1,21 +1,21 @@
-import type { HydratedDocument, Model } from 'mongoose';
-
 import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import {
+  type GetUsersRequest,
+  type GetUsersResponse,
   type LoginRequest,
   type LoginResponse,
   type RegisterRequest,
   type User as UserDto,
 } from '@recipes/contracts';
 import { rpcError } from '@recipes/contracts/grpc';
+import { type HydratedDocument, isValidObjectId, type Model } from 'mongoose';
 
 import { hashPassword, verifyPassword } from './password.js';
 import { TokenService } from './token.service.js';
 import { User } from './user.schema.js';
-
 /** Duplicate key error: the email already exists (unique index) */
 const DUPLICATE_KEY = 11_000;
 
@@ -54,6 +54,15 @@ export class UserController {
       }
       throw error;
     }
+  }
+
+  @GrpcMethod('UserService', 'GetUsers')
+  async getUsers({ ids }: GetUsersRequest): Promise<GetUsersResponse> {
+    const users = await this.users.find({
+      _id: { $in: ids.filter((id) => isValidObjectId(id)) },
+    });
+  
+    return { users: users.map((user) => toDto(user)) };
   }
 }
 
